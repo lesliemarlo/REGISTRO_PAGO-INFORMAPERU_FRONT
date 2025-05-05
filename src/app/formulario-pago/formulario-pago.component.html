@@ -1,0 +1,125 @@
+<div class="container mt-5">
+    <h2 class="mb-4">Registro de Pago</h2>
+    <form [formGroup]="pagoForm" (ngSubmit)="onSubmit()">
+      
+      <!-- Sección Cliente -->
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          Datos del Cliente
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="cliente_dni" class="form-label">DNI Cliente</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="cliente_dni" formControlName="cliente_dni">
+                <button class="btn btn-outline-secondary" type="button" (click)="buscarCliente()">Buscar</button>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="cliente_nombre" class="form-label">Nombre Cliente</label>
+              <input type="text" class="form-control" id="cliente_nombre" formControlName="cliente_nombre" readonly>
+            </div>
+            <div class="col-md-6">
+              <label for="cliente_cartera" class="form-label">Cartera</label>
+              <input type="text" class="form-control" id="cliente_cartera" formControlName="cliente_cartera" readonly>
+            </div>
+            <div class="col-md-6">
+              <label for="cliente_numero_producto" class="form-label">Número de Producto</label>
+              <input type="text" class="form-control" id="cliente_numero_producto" formControlName="cliente_numero_producto" readonly>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sección Asesor -->
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          Datos del Asesor
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label for="asesor_dni" class="form-label">DNI Asesor</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="asesor_dni" formControlName="asesor_dni" readonly>
+                <button class="btn btn-outline-secondary" type="button" (click)="abrirModalAsesores()">Asesores</button>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label for="asesor_nombre" class="form-label">Nombre Asesor</label>
+              <input type="text" class="form-control" id="asesor_nombre" formControlName="asesor_nombre" readonly>
+            </div>
+            <div class="col-md-4">
+              <label for="asesor_rango" class="form-label">Rango</label>
+              <input type="text" class="form-control" id="asesor_rango" formControlName="asesor_rango" readonly>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sección Encargado -->
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          Datos del Encargado
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="encargado_username" class="form-label">Username</label>
+              <input type="text" class="form-control" id="encargado_username" formControlName="encargado_username" readonly>
+            </div>
+            <div class="col-md-6">
+              <label for="encargado_nombre" class="form-label">Nombre</label>
+              <input type="text" class="form-control" id="encargado_nombre" formControlName="encargado_nombre" readonly>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sección Pago -->
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          Datos del Pago
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label for="fecha_voucher" class="form-label">Fecha Voucher</label>
+              <input type="date" class="form-control" id="fecha_voucher" formControlName="fecha_voucher">
+            </div>
+            <div class="col-md-4">
+              <label for="tipo_pago" class="form-label">Tipo de Pago</label>
+              <select class="form-select" id="tipo_pago" formControlName="tipo_pago">
+                <option value="">Seleccionar...</option>
+                <option value="POLITICA">Política</option>
+                <option value="OTRO">Otro</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="importe" class="form-label">Importe</label>
+              <input type="number" step="0.01" class="form-control" id="importe" formControlName="importe">
+            </div>
+            <div class="col-md-6">
+              <label for="empresa" class="form-label">Empresa</label>
+              <input type="text" class="form-control" id="empresa" formControlName="empresa">
+            </div>
+            <div class="col-md-6">
+              <label for="voucher_link" class="form-label">Link del Voucher</label>
+              <input type="url" class="form-control" id="voucher_link" formControlName="voucher_link">
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button type="submit" class="btn btn-primary me-md-2">Registrar Pago</button>
+        <button type="reset" class="btn btn-secondary">Limpiar</button>
+      </div>
+    </form>
+
+    <!-- Aquí es donde agregamos el botón de "Cerrar sesión" -->
+    <!-- Botón para cerrar sesión -->
+<a href="#" (click)="cerrarSesion()" class="btn btn-danger">Cerrar Sesión</a>
+
+</div>
