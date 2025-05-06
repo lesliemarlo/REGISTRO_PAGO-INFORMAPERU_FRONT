@@ -88,10 +88,13 @@ export class FormularioPagoComponent implements OnInit {
         }
       });
   }
+  isSearchingClient: boolean = false; // Esto va en tu componente
 
   buscarCliente(): void {
     const dni = this.pagoForm.get('cliente_dni')?.value;
     if (dni) {
+      this.isSearchingClient = true; // Activa barra
+  
       this.http.get(`http://localhost:8090/clientes/${dni}`).subscribe({
         next: (data: any) => {
           this.pagoForm.patchValue({
@@ -99,11 +102,16 @@ export class FormularioPagoComponent implements OnInit {
             cliente_cartera: data.nombre_campana,
             cliente_numero_producto: data.codigo_producto
           });
+          this.isSearchingClient = false; // Desactiva barra
         },
-        error: (error) => console.error('Error al buscar cliente:', error)
+        error: (error) => {
+          console.error('Error al buscar cliente:', error);
+          this.isSearchingClient = false; // También si falla
+        }
       });
     }
   }
+  
 
   abrirModalAsesores() {
     const modalRef = this.modalService.open(AsesoresModalComponent, {
@@ -128,25 +136,85 @@ export class FormularioPagoComponent implements OnInit {
     });
   }
   
-  
-  onSubmit(): void {
-    if (this.pagoForm.valid) {
-      this.http.post('http://localhost:8090/api/pagos/registrar', this.pagoForm.value).subscribe({
-        next: (response) => {
-          alert('Pago registrado con éxito!');
-          this.pagoForm.reset();
-          // Restablecer valores del encargado
-          this.pagoForm.patchValue({
-            encargado_username: this.encargadoData.username,
-            encargado_nombre: this.encargadoData.nombre
-          });
-        },
-        error: (error) => console.error('Error al registrar pago:', error)
-      });
-    }
+
+
+onSubmit() {
+  if (this.confirmacionPendiente) {
+    alert('Por favor confirma la subida del voucher antes de enviar el formulario.');
+    return;
   }
+  if (this.selectedFile) {
+
+    const formData = new FormData();
+    formData.append('file', this.selectedFile);
+
+    this.http.post('http://localhost:8090/api/pagos/registrar', this.pagoForm.value)
+    .subscribe(response => {
+      console.log('Registro exitoso', response);
+    });
+  } else {
+    this.enviarFormulario();
+  }
+}
+//checar esto
+enviarFormulario() {
+  this.http.post('http://localhost:8090/api/pagos/registrar', this.pagoForm.value)
+    .subscribe(response => {
+      console.log('Registro exitoso', response);
+    });
+}
+
   cerrarSesion(): void {
     this.sesionService.logout(); // Llama al servicio para cerrar la sesión
   }
-  
+
+  selectedFile: File | null = null;
+imagePreview: string | null = null;
+confirmacionPendiente: boolean = false;
+
+onFileSelected(event: any) {
+  const file = event.target.files[0];
+  if (file) {
+    this.selectedFile = file;
+
+    // Mostrar vista previa
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.imagePreview = reader.result as string;
+      this.confirmacionPendiente = true;
+    };
+    reader.readAsDataURL(file);
+  }
 }
+
+cancelarSubida() {
+  this.selectedFile = null;
+  this.imagePreview = null;
+  this.confirmacionPendiente = false;
+}
+
+isUploading: boolean = false; // Esto va en tu componente
+
+confirmarSubida() {
+  if (this.selectedFile) {
+    this.isUploading = true; // Mostramos la barra de carga desde el inicio
+
+    const formData = new FormData();
+    formData.append('file', this.selectedFile);
+
+    this.http.post<any>('http://localhost:8090/api/drive/upload', formData)
+      .subscribe({
+        next: response => {
+          const url = response.webViewLink;
+          this.pagoForm.patchValue({ voucher_link: url });
+          this.imagePreview = null;
+          this.confirmacionPendiente = false;
+          this.isUploading = false; // Ocultamos la barra
+        },
+        error: error => {
+          console.error('Error al subir imagen:', error);
+          this.isUploading = false; // Ocultamos la barra también si falla
+        }
+      });
+  }
+}}

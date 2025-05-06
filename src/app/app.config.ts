@@ -12,7 +12,8 @@ export const appConfig: ApplicationConfig = {
       HttpClientModule,
       FormsModule,
       ReactiveFormsModule,
-      NgbModule
+      NgbModule,
+      
     )
   ]
 };
