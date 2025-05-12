@@ -160,18 +160,7 @@
               {{ getMensajeError('importe') }}
             </div>
           </div>
-          <div class="col-md-4">
-            <label for="empresa" class="form-label">Empresa</label>
-            <select class="form-select" id="empresa" formControlName="empresa"
-                    [ngClass]="{'is-invalid': campoNoValido('empresa')}">
-              <option value="">Seleccionar...</option>
-              <option value="PROEMPRESA">PROEMPRESA</option>
-              <option value="INCLUSIVA">INCLUSIVA</option>
-            </select>
-            <div *ngIf="campoNoValido('empresa')" class="invalid-feedback">
-              {{ getMensajeError('empresa') }}
-            </div>
-          </div>
+         
          
           <!---->
           <div class="mb-3">

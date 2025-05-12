@@ -9,7 +9,7 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) {}
 
   login(credentials: {username: string, password: string}) {
-    return this.http.post('http://localhost:8090/api/auth/login', credentials);
+    return this.http.post('https://registro-pagos-informaperu-back.onrender.com/api/auth/login', credentials);
   }
 
   logout() {

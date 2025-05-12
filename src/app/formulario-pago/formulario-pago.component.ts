@@ -7,10 +7,11 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SesionService } from '../service/sesion.service';
 import { NotificacionModalComponent } from './notificacion-modal.component';
+import { ClientesModalComponent } from './app-clientes-modal.component';
 
 @Component({
   selector: 'app-formulario-pago',
-  imports: [CommonModule, ReactiveFormsModule, NotificacionModalComponent],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './formulario-pago.component.html',
   styleUrl: './formulario-pago.component.css'
 })
@@ -52,7 +53,7 @@ export class FormularioPagoComponent implements OnInit {
       fecha_voucher: ['', Validators.required],
       tipo_pago: ['', Validators.required],
       importe: ['', [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)]],
-      empresa: ['', Validators.required],
+      
       voucher_link: ['', Validators.required]
     });
   }
@@ -103,7 +104,7 @@ export class FormularioPagoComponent implements OnInit {
   cargarAsesores(): void {
     console.log('Cargando asesores para encargado ID:', this.encargadoData.id);
     
-    this.http.get<any[]>(`http://localhost:8090/api/asesores/by-encargado/${this.encargadoData.id}`)
+    this.http.get<any[]>(`https://registro-pagos-informaperu-back.onrender.com/api/asesores/by-encargado/${this.encargadoData.id}`)
       .subscribe({
         next: (asesores) => {
           console.log('Asesores recibidos:', asesores);
@@ -116,29 +117,33 @@ export class FormularioPagoComponent implements OnInit {
       });
   }
 
+   // Método actualizado para buscar cliente y manejar múltiples resultados
   buscarCliente(): void {
     const dni = this.pagoForm.get('cliente_dni')?.value;
     if (dni) {
       this.isSearchingClient = true;
   
-      this.http.get<any[]>(`http://localhost:8090/api/clientes/buscar-por-dni?dni=${dni}`).subscribe({
-        next: (data: any[]) => {
-          if (data.length > 0) {
-            const cliente = data[0]; // Toma el primero de la lista
-            this.pagoForm.patchValue({
-              cliente_nombre: cliente.cliente_nombre,
-              cliente_cartera: cliente.cliente_cartera,
-              cliente_numero_producto: cliente.cliente_numero_producto?.replace(/[\r\n]/g, '') // Limpiamos por si acaso
-            });
-          } else {
-            this.mostrarError('No se encontraron clientes con ese DNI.');
-          }
+      this.http.get<any[]>(`https://registro-pagos-informaperu-back.onrender.com/api/clientes/buscar-por-dni?dni=${dni}`).subscribe({
+        next: (clientes: any[]) => {
           this.isSearchingClient = false;
+          
+          if (clientes.length === 0) {
+            this.mostrarError('No se encontraron clientes con ese DNI.');
+            return;
+          }
+          
+          if (clientes.length === 1) {
+            // Si solo hay un cliente, lo seleccionamos automáticamente
+            this.seleccionarCliente(clientes[0]);
+          } else {
+            // Si hay múltiples clientes, abrimos el modal para selección
+            this.abrirModalClientes(clientes);
+          }
         },
         error: (error) => {
           console.error('Error al buscar cliente:', error);
           this.isSearchingClient = false;
-          this.mostrarError('Cliente no encontrado. Verifique el DNI.');
+          this.mostrarError('Error al buscar cliente. Verifique el DNI o intente nuevamente.');
         }
       });
     } else {
@@ -146,10 +151,37 @@ export class FormularioPagoComponent implements OnInit {
     }
   }
   
+  // Método para abrir el modal de selección de clientes
+  abrirModalClientes(clientes: any[]): void {
+    const modalRef = this.modalService.open(ClientesModalComponent, {
+      centered: true,
+      size: 'lg'
+    });
+    
+    modalRef.componentInstance.clientes = clientes;
+    
+    modalRef.result.then((clienteSeleccionado) => {
+      if (clienteSeleccionado) {
+        this.seleccionarCliente(clienteSeleccionado);
+      }
+    }).catch((err) => {
+      console.log('Modal cerrado sin selección');
+    });
+  }
+  
+  // Método para seleccionar un cliente y actualizar el formulario
+  seleccionarCliente(cliente: any): void {
+    this.pagoForm.patchValue({
+      cliente_nombre: cliente.cliente_nombre,
+      cliente_cartera: cliente.cliente_cartera,
+      cliente_numero_producto: cliente.cliente_numero_producto?.replace(/[\r\n]/g, '') // Limpiamos por si acaso
+    });
+  }
+  
   
   abrirModalAsesores() {
     // Primero cargamos los asesores habilitados del backend
-    this.http.get<any[]>(`http://localhost:8090/api/asesores/by-encargado/${this.encargado.id}`)
+    this.http.get<any[]>(`https://registro-pagos-informaperu-back.onrender.com/api/asesores/by-encargado/${this.encargado.id}`)
       .subscribe({
         next: (asesoresHabilitados) => {
           console.log('Asesores habilitados recibidos:', asesoresHabilitados);
@@ -206,7 +238,7 @@ export class FormularioPagoComponent implements OnInit {
   }
   
   enviarFormulario() {
-    this.http.post('http://localhost:8090/api/pagos/registrar', this.pagoForm.value)
+    this.http.post('https://registro-pagos-informaperu-back.onrender.com/api/pagos/registrar', this.pagoForm.value)
       .subscribe({
         next: (response) => {
           console.log('Registro exitoso', response);
@@ -325,7 +357,7 @@ export class FormularioPagoComponent implements OnInit {
       const formData = new FormData();
       formData.append('file', this.selectedFile);
 
-      this.http.post<any>('http://localhost:8090/api/drive/upload', formData)
+      this.http.post<any>('https://registro-pagos-informaperu-back.onrender.com/api/drive/upload', formData)
         .subscribe({
           next: response => {
             const url = response.webViewLink;

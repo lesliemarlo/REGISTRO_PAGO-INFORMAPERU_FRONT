@@ -41,7 +41,7 @@ export class LoginComponent {
         password: this.loginForm.get('password')?.value
       };
   
-      this.http.post<any>('http://localhost:8090/api/auth/login', credentials)
+      this.http.post<any>('https://registro-pagos-informaperu-back.onrender.com/api/auth/login', credentials)
         .subscribe({
           next: (response) => {
             console.log('Respuesta completa del login:', response);
